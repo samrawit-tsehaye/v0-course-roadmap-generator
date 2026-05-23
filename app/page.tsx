@@ -145,16 +145,15 @@ export default function Home() {
       <footer className="border-t border-border/40 py-6 print:hidden">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>
-            Powered by{" "}
+            Made with{" "}
             <a
-              href="https://ai.google.dev/"
+              href="https://v0.dev"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              Google Gemini
+              v0.dev
             </a>
-            . Your API key is stored locally and never sent to our servers.
           </p>
         </div>
       </footer>

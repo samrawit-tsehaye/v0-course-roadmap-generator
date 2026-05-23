@@ -3,12 +3,20 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { courseTitle, apiKey } = await request.json()
+    const { courseTitle } = await request.json()
 
-    if (!courseTitle || !apiKey) {
+    if (!courseTitle) {
       return NextResponse.json(
-        { error: "Course title and API key are required" },
+        { error: "Course title is required" },
         { status: 400 }
+      )
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Server configuration error: API key not set" },
+        { status: 500 }
       )
     }
 
