@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Sparkles, BookOpen, AlertCircle } from "lucide-react"
+import { Sparkles, BookOpen, XCircle } from "lucide-react"
+import { toast } from "sonner"
 import type { RoadmapData } from "@/lib/types"
 
 interface CourseFormProps {
@@ -23,8 +23,11 @@ export function CourseForm({ onGenerate, onLoadingChange }: CourseFormProps) {
     e.preventDefault()
     setError(null)
 
-    if (!courseTitle.trim()) {
+    const trimmedTitle = courseTitle.trim()
+    
+    if (!trimmedTitle) {
       setError("Please enter a course title")
+      toast.error("Please enter a course title")
       return
     }
 
@@ -38,7 +41,7 @@ export function CourseForm({ onGenerate, onLoadingChange }: CourseFormProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          courseTitle: courseTitle.trim(),
+          courseTitle: trimmedTitle,
         }),
       })
 
@@ -48,9 +51,14 @@ export function CourseForm({ onGenerate, onLoadingChange }: CourseFormProps) {
         throw new Error(data.error || "Failed to generate roadmap")
       }
 
-      onGenerate(data, courseTitle.trim())
+      toast.success("Roadmap generated successfully!")
+      onGenerate(data, trimmedTitle)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred")
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred"
+      setError(errorMessage)
+      toast.error(errorMessage, {
+        duration: 10000,
+      })
     } finally {
       setIsLoading(false)
       onLoadingChange(false)
@@ -70,6 +78,25 @@ export function CourseForm({ onGenerate, onLoadingChange }: CourseFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Error Alert - Inline display */}
+          {error && (
+            <div className="flex items-start gap-3 rounded-lg border border-red-500/50 bg-red-500/10 p-4">
+              <XCircle className="h-5 w-5 shrink-0 text-red-500" />
+              <div className="flex-1">
+                <p className="font-medium text-red-500">Error</p>
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setError(null)}
+                className="text-red-400 hover:text-red-300"
+                aria-label="Dismiss error"
+              >
+                <XCircle className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
           {/* Course Title Input */}
           <div className="space-y-2">
             <Label htmlFor="courseTitle" className="flex items-center gap-2">
@@ -82,22 +109,15 @@ export function CourseForm({ onGenerate, onLoadingChange }: CourseFormProps) {
               placeholder="e.g., Web Development, Machine Learning, Graphic Design"
               value={courseTitle}
               onChange={(e) => setCourseTitle(e.target.value)}
+              disabled={isLoading}
             />
           </div>
-
-          {/* Error Alert */}
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           {/* Submit Button */}
           <Button
             type="submit"
             className="w-full gap-2"
-            disabled={isLoading}
+            disabled={isLoading || !courseTitle.trim()}
           >
             {isLoading ? (
               <>
